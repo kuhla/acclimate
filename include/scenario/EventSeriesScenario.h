@@ -46,9 +46,11 @@ class EventSeriesScenario : public ExternalScenario<ModelVariant> {
         using ExternalForcing::time_index;
         using ExternalForcing::variable;
         std::vector<Firm<ModelVariant>*> firms;
+		std::vector<GeoLocation<ModelVariant>*> locations;
         std::vector<Forcing> forcings;
         std::size_t regions_count;
         std::size_t sectors_count;
+        std::size_t sea_objects_count;
 
         void read_data() override;
 

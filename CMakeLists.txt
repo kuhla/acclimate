@@ -110,13 +110,13 @@ include_nlopt(acclimate OFF "34fd7ce")
 find_package(NETCDF REQUIRED)
 message(STATUS "NetCDF include directory: ${NETCDF_INCLUDE_DIR}")
 message(STATUS "NetCDF library: ${NETCDF_LIBRARY}")
-target_link_libraries(acclimate PRIVATE netcdf)
+target_link_libraries(acclimate PUBLIC netcdf)
 
 # include NetCDF C++ library
 find_package(NETCDF_CPP4 REQUIRED)
 message(STATUS "NetCDF_c++4 include directory: ${NETCDF_CPP4_INCLUDE_DIR}")
 message(STATUS "NetCDF_c++4 library: ${NETCDF_CPP4_LIBRARY}")
-target_link_libraries(acclimate PRIVATE netcdf_c++4)
+target_link_libraries(acclimate PUBLIC netcdf_c++4)
 
 include(CheckStructHasMember)
 set(CMAKE_REQUIRED_INCLUDES "${NETCDF_CPP4_INCLUDE_DIR}" "${NETCDF_INCLUDE_DIR}")
