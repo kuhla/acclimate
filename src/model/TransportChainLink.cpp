@@ -91,6 +91,7 @@ void TransportChainLink<ModelVariant>::push_flow_Z(const Flow& flow_Z, const Flo
 
 template<class ModelVariant>
 void TransportChainLink<ModelVariant>::set_forcing_nu(Forcing forcing_nu_p, std::vector<Sector<ModelVariant>*> sectors) {
+    std::cout << "du solltest nicht hier sein 4 " << std::endl;
     assertstep(SCENARIO);
     if ( sectors.empty() ) {
         forcing_nu = forcing_nu_p;
