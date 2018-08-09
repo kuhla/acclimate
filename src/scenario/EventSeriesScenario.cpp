@@ -52,13 +52,14 @@ void EventSeriesScenario<ModelVariant>::read_forcings() {
         }
     }
     {
+        std::vector<Sector<ModelVariant>*> sectors;
         auto forcing_l = static_cast<EventForcing*>(forcing.get());
         for (std::size_t i = 0; i < forcing_l->locations.size(); ++i) {
             if (forcing_l->locations[i]) {
                 if(forcing_l->forcings[i] < 0.0) {
-                    forcing_l->locations[i]->set_forcing_nu( -1.);
+                    forcing_l->locations[i]->set_forcing_nu( -1., sectors);
                 } else {
-                    forcing_l->locations[i]->set_forcing_nu( forcing_l->forcings[i]);
+                    forcing_l->locations[i]->set_forcing_nu( forcing_l->forcings[i], sectors);
                 }
             }
         }

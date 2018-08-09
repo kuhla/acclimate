@@ -90,9 +90,19 @@ void TransportChainLink<ModelVariant>::push_flow_Z(const Flow& flow_Z, const Flo
 }
 
 template<class ModelVariant>
-void TransportChainLink<ModelVariant>::set_forcing_nu(Forcing forcing_nu_p) {
+void TransportChainLink<ModelVariant>::set_forcing_nu(Forcing forcing_nu_p, std::vector<Sector<ModelVariant>*> sectors) {
     assertstep(SCENARIO);
-    forcing_nu = forcing_nu_p;
+    if ( sectors.empty() ) {
+        forcing_nu = forcing_nu_p;
+    } else {
+        Sector<ModelVariant>* seller_sector = business_connection->seller->firm->sector;
+        for ( size_t i = 0; i < sectors.size(); i++) {
+            if ( seller_sector == sectors[i]) {
+                forcing_nu = forcing_nu_p;
+                break;
+            }
+        }
+    }
 }
 
 template<class ModelVariant>

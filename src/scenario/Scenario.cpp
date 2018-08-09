@@ -62,12 +62,17 @@ void Scenario<ModelVariant>::set_consumer_property(Consumer<ModelVariant>* consu
 
 template<class ModelVariant>
 void Scenario<ModelVariant>::set_location_property(GeoLocation<ModelVariant>* location, const settings::SettingsNode& node, const bool reset) {
-    for (const auto& it_map : node.as_map()) {
-        const std::string& name = it_map.first;
-        const settings::SettingsNode& it = it_map.second;
-        if (name == "passage") {
-            location->set_forcing_nu(reset ? -1. : it.as<Forcing>());
+    std::vector<Sector<ModelVariant>*> sectors;
+    if ( node.has("sectors") ) {
+        for (const auto& it : node["sectors"].as_sequence()) {
+            Sector<ModelVariant>* sector = model()->find_sector(it.template as<std::string>());
+            sectors.emplace_back(sector);
         }
+    }
+    if ( node.has("passage") ) {
+        location->set_forcing_nu(reset ? -1. : node["passage"].as<Forcing>(), sectors);
+    } else {
+        error("No passage for " << node["sea_route"].template as<std::string>() << " given!" );
     }
 }
 

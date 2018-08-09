@@ -31,6 +31,8 @@ template<class ModelVariant>
 class Model;
 template<class ModelVariant>
 class TransportChainLink;
+template<class ModelVariant>
+class Sector;
 
 template<class ModelVariant>
 class GeoEntity {
@@ -48,7 +50,7 @@ class GeoEntity {
     GeoEntity(Model<ModelVariant>* const model_p, TransportDelay delay_p, Type type_p);
     virtual ~GeoEntity();
     Type type() const { return type_m; }
-    void set_forcing_nu(Forcing forcing_nu_p);
+    void set_forcing_nu(Forcing forcing_nu_p, std::vector<Sector<ModelVariant>*> sectors);
     void remove_transport_chain_link(TransportChainLink<ModelVariant>* transport_chain_link);
     inline Model<ModelVariant>* model() const { return model_m; }
     virtual std::string id() const = 0;

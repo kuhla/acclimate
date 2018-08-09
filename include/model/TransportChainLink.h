@@ -33,6 +33,8 @@ template<class ModelVariant>
 class GeoEntity;
 template<class ModelVariant>
 class Model;
+template<class ModelVariant>
+class Sector;
 
 template<class ModelVariant>
 class TransportChainLink {
@@ -58,7 +60,7 @@ class TransportChainLink {
 
     ~TransportChainLink();
     void push_flow_Z(const Flow& flow_Z, const FlowQuantity& initial_flow_Z_star);
-    void set_forcing_nu(Forcing forcing_nu_p);
+    void set_forcing_nu(Forcing forcing_nu_p, std::vector<Sector<ModelVariant>*>);
     inline TransportDelay transport_delay() const { return transport_queue.size(); }
     Flow get_total_flow() const;
     Flow get_disequilibrium() const;
