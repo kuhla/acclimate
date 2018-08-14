@@ -49,6 +49,7 @@ class EconomicAgent {
 
   protected:
     Forcing forcing_ = Forcing(1.0);
+    Time    last_change_time = Time(0.0);
 
   public:
     Sector<ModelVariant>* const sector;
@@ -71,7 +72,14 @@ class EconomicAgent {
     inline void forcing(const Forcing& forcing_p) {
         assertstep(SCENARIO);
         assert(forcing_p >= 0.0);
-        forcing_ = forcing_p;
+        if ( last_change_time == model()->time() ) {
+			if ( forcing_p < forcing_ ) {
+				forcing_ = forcing_p;
+			}
+        } else {
+			forcing_ = forcing_p;
+            last_change_time = model()->time();		
+		}
     }
     virtual Firm<ModelVariant>* as_firm();
     virtual const Firm<ModelVariant>* as_firm() const;
