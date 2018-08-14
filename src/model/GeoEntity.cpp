@@ -31,7 +31,6 @@ GeoEntity<ModelVariant>::GeoEntity(Model<ModelVariant>* const model_p, Transport
 
 template<class ModelVariant>
 void GeoEntity<ModelVariant>::set_forcing_nu(Forcing forcing_nu_p, std::vector<Sector<ModelVariant>*> sectors) {
-    std::cout << "du solltest nicht hier sein 3 " << std::endl;
     for (std::size_t i = 0; i < transport_chain_links.size(); ++i) {
         transport_chain_links[i]->set_forcing_nu(forcing_nu_p, sectors);
     }

@@ -62,7 +62,6 @@ void Scenario<ModelVariant>::set_consumer_property(Consumer<ModelVariant>* consu
 
 template<class ModelVariant>
 void Scenario<ModelVariant>::set_location_property(GeoLocation<ModelVariant>* location, const settings::SettingsNode& node, const bool reset) {
-    std::cout << "du solltest nicht hier sein 2 " << std::endl;
     std::vector<Sector<ModelVariant>*> sectors;
     if ( node.has("sectors") ) {
         for (const auto& it : node["sectors"].as_sequence()) {
@@ -79,7 +78,6 @@ void Scenario<ModelVariant>::set_location_property(GeoLocation<ModelVariant>* lo
 
 template<class ModelVariant>
 void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, const bool reset) {
-    std::cout << "du solltest nicht hier sein 1 " << std::endl;
     for (const auto& targets : node.as_sequence()) {
         for (const auto& target : targets.as_map()) {
             const std::string& type = target.first;
