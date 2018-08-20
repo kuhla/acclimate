@@ -63,27 +63,27 @@ Run<ModelVariant>::Run(settings::SettingsNode settings_p) : settings_m(std::move
         model_m.reset(model);
     }
 
-    Scenario<ModelVariant>* scenario;  // TODO put in scope below!
+    Scenario<ModelVariant>* sub_scenario;  // TODO put in scope below!
     for (auto scenario_node : settings_m["scenarios"].as_sequence()) {
         const std::string& type = scenario_node["type"].as<std::string>();
         if (type == "events") {
-            scenario = new Scenario<ModelVariant>(settings_m, scenario_node, model);
+            sub_scenario = new DirectShock<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "taxes") {
-            scenario = new Taxes<ModelVariant>(settings_m, scenario_node, model);
+            sub_scenario = new Taxes<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "flooding") {
-            scenario = new Flooding<ModelVariant>(settings_m, scenario_node, model);
+            sub_scenario = new Flooding<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "hurricanes") {
-            scenario = new Hurricanes<ModelVariant>(settings_m, scenario_node, model);
+            sub_scenario = new Hurricanes<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "direct_population") {
-            scenario = new DirectPopulation<ModelVariant>(settings_m, scenario_node, model);
+            sub_scenario = new DirectPopulation<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "heat_labor_productivity") {
-            scenario = new HeatLaborProductivity<ModelVariant>(settings_m, scenario_node, model);
+            sub_scenario = new HeatLaborProductivity<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "event_series") {
-            scenario = new EventSeriesScenario<ModelVariant>(settings_m, scenario_node, model);
+            sub_scenario = new EventSeriesScenario<ModelVariant>(settings_m, scenario_node, model);
         } else {
             error_("Unknown scenario type '" << type << "'");
         }
-        scenarios_m.emplace_back(scenario);
+        scenario_m->sub_scenarios.emplace_back(sub_scenario);
     }
 
     for (const auto& node : settings_m["outputs"].as_sequence()) {
@@ -125,9 +125,8 @@ int Run<ModelVariant>::run() {
 
     step(IterationStep::INITIALIZATION);
 
-    for (const auto& scenario : scenarios_m) {
-        scenario->start();
-    }
+    scenario_m->start();
+    
     model_m->start();
     for (const auto& output : outputs_m) {
         output->start();
@@ -150,9 +149,7 @@ int Run<ModelVariant>::run() {
     auto t0 = std::chrono::high_resolution_clock::now();
 
     while (!model_m->done()) {
-        for (const auto& scenario : scenarios_m) {
-            scenario->iterate();
-        }
+        scenario_m->iterate();
 #ifdef ENABLE_DMTCP
         if (settings_m.has("checkpoint")) {
             if (settings_m["checkpoint"].template as<int>()
@@ -230,15 +227,13 @@ int Run<ModelVariant>::run() {
 template<class ModelVariant>
 Run<ModelVariant>::~Run() {
     if (has_run && run_result == 0) {
-        for (auto& scenario : scenarios_m) {
-            scenario->end();
-        }
+        scenario_m->end();
         for (auto& output : outputs_m) {
             output->end();
         }
     }
     outputs_m.clear();
-    scenarios_m.clear();
+    scenario_m.clear();
     model_m.reset();
 }
 

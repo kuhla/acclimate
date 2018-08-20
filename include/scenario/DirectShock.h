@@ -18,23 +18,29 @@
   along with Acclimate.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "scenario/Scenario.h"
-#include <random>
-#include <utility>
-#include "model/EconomicAgent.h"
-#include "model/Region.h"
-#include "model/Sector.h"
-#include "run.h"
+#ifndef ACCLIMATE_DIRECTSHOCK_H
+#define ACCLIMATE_DIRECTSHOCK_H
+
+#include <string>
+#include "model/Consumer.h"
+#include "model/Firm.h"
+#include "model/Model.h"
 #include "settingsnode.h"
-#include "variants/ModelVariants.h"
+#include "types.h"
 
 namespace acclimate {
 
 template<class ModelVariant>
-Scenario<ModelVariant>::Scenario(const settings::SettingsNode& settings_p, settings::SettingsNode scenario_node_p, Model<ModelVariant>* const model_p)
-    : model_m(model_p), scenario_node(scenario_node_p), settings(settings_p) {
-    srand(0);
-}
+class DirectShock : public Scenario<ModelVariant> {
+  protected:
+    using Scenario<ModelVariant>::scenario_node;
+    using Scenario<ModelVariant>::settings;
+    using Scenario<ModelVariant>:: model_m;
+    void apply_target(const settings::SettingsNode& node, const bool reset);
 
-INSTANTIATE_BASIC(Scenario);
+  public:
+    DirectShock(const settings::SettingsNode& settings_p, settings::SettingsNode scenario_node_p, Model<ModelVariant>* const model_p);
+};
 }  // namespace acclimate
+
+#endif

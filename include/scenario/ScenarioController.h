@@ -18,8 +18,8 @@
   along with Acclimate.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ACCLIMATE_SCENARIO_H
-#define ACCLIMATE_SCENARIO_H
+#ifndef ACCLIMATE_SCENARIOCONTROLLER_H
+#define ACCLIMATE_SCENARIOCONTROLLER_H
 
 #include <string>
 #include "model/Consumer.h"
@@ -31,11 +31,13 @@
 namespace acclimate {
 
 template<class ModelVariant>
-class Scenario : public ScenarioController<ModelVariant> {
+class ScenarioController {
   protected:
-    settings::SettingsNode scenario_node;
-    const settings::SettingsNode& settings;
-    Model<ModelVariant>* const model_m;
+    std::vector<std::unique_ptr<Scenario<ModelVariant>>> scenarios;
+    void set_firm_property(Firm<ModelVariant>* firm, const settings::SettingsNode& node, const bool reset);
+    void set_consumer_property(Consumer<ModelVariant>* consumer, const settings::SettingsNode& node, const bool reset);
+    void set_location_property(GeoLocation<ModelVariant>* location, const settings::SettingsNode& node, const bool reset);
+    void apply_target(const settings::SettingsNode& node, const bool reset);
 
   public:
     Scenario(const settings::SettingsNode& settings_p, settings::SettingsNode scenario_node_p, Model<ModelVariant>* const model_p);
@@ -44,6 +46,7 @@ class Scenario : public ScenarioController<ModelVariant> {
     virtual void end() {}
     virtual bool is_first_timestep() const { return model()->timestep() == 0; }
     virtual bool is_last_timestep() const { return model()->time() >= model()->stop_time(); }
+    virtual bool iterate();
     virtual std::string calendar_str() const { return "standard"; }
     virtual std::string time_units_str() const;
     inline Model<ModelVariant>* model() const { return model_m; }
