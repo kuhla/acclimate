@@ -23,6 +23,8 @@
 
 #include "scenario/RasteredScenario.h"
 #include "types.h"
+#include "run.h"
+
 
 namespace acclimate {
 
@@ -41,6 +43,7 @@ class DirectPopulation : public RasteredScenario<ModelVariant, FloatType> {
         FloatType x, FloatType y, FloatType proxy_value, FloatType cell_forcing, const Region<ModelVariant>* region, FloatType& region_forcing) const override;
 
   public:
+    using RasteredScenario<ModelVariant,  FloatType>::model;
     DirectPopulation(const settings::SettingsNode& settings_p, settings::SettingsNode scenario_node_p, Model<ModelVariant>* const model_p);
 };
 }  // namespace acclimate

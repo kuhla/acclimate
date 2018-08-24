@@ -23,6 +23,7 @@
 
 #include <cstddef>
 #include <string>
+#include <run.h>
 #include <vector>
 #include "scenario/ExternalForcing.h"
 #include "scenario/ExternalScenario.h"

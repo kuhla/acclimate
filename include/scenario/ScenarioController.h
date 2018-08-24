@@ -33,24 +33,14 @@ namespace acclimate {
 template<class ModelVariant>
 class ScenarioController {
   protected:
-    std::vector<std::unique_ptr<Scenario<ModelVariant>>> scenarios;
-    void set_firm_property(Firm<ModelVariant>* firm, const settings::SettingsNode& node, const bool reset);
-    void set_consumer_property(Consumer<ModelVariant>* consumer, const settings::SettingsNode& node, const bool reset);
-    void set_location_property(GeoLocation<ModelVariant>* location, const settings::SettingsNode& node, const bool reset);
-    void apply_target(const settings::SettingsNode& node, const bool reset);
+    void set_firm_forcing(Firm<ModelVariant>* firm, const Forcing& forcing);
+    void set_consumer_forcing(Consumer<ModelVariant>* consumer, const Forcing& forcing);
+    void set_location_forcing(GeoLocation<ModelVariant>* location, const Forcing& forcing);
+    std::vector<Scenario<ModelVariant>*> scenarios;
 
   public:
-    Scenario(const settings::SettingsNode& settings_p, settings::SettingsNode scenario_node_p, Model<ModelVariant>* const model_p);
-    virtual ~Scenario() {}
-    virtual Time start() { return Time(0.0); }  // TODO eliminate return type
-    virtual void end() {}
-    virtual bool is_first_timestep() const { return model()->timestep() == 0; }
-    virtual bool is_last_timestep() const { return model()->time() >= model()->stop_time(); }
-    virtual bool iterate();
-    virtual std::string calendar_str() const { return "standard"; }
-    virtual std::string time_units_str() const;
-    inline Model<ModelVariant>* model() const { return model_m; }
-    virtual inline std::string id() const { return "SCENARIO"; }
+    ScenarioController();
+    virtual ~ScenarioController() {}
 };
 }  // namespace acclimate
 

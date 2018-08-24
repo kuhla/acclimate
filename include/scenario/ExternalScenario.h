@@ -34,8 +34,6 @@ class ExternalScenario : public Scenario<ModelVariant> {
   protected:
     using Scenario<ModelVariant>::scenario_node;
     using Scenario<ModelVariant>::settings;
-    using Scenario<ModelVariant>::set_firm_property;
-    using Scenario<ModelVariant>::set_consumer_property;
 
     std::string forcing_file;
     std::string expression;
@@ -69,6 +67,7 @@ class ExternalScenario : public Scenario<ModelVariant> {
     using Scenario<ModelVariant>::model;
     using Scenario<ModelVariant>::is_first_timestep;
     virtual ~ExternalScenario() {}
+	Time start_time() override;
     bool iterate() override;
     Time start() override;
     void end() override;

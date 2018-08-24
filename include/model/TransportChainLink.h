@@ -58,6 +58,7 @@ class TransportChainLink {
 
     ~TransportChainLink();
     void push_flow_Z(const Flow& flow_Z, const FlowQuantity& initial_flow_Z_star);
+    inline Forcing forcing() {return forcing_nu;}
     void set_forcing_nu(Forcing forcing_nu_p);
     inline TransportDelay transport_delay() const { return transport_queue.size(); }
     Flow get_total_flow() const;

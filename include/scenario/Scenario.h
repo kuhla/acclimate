@@ -31,7 +31,7 @@
 namespace acclimate {
 
 template<class ModelVariant>
-class Scenario : public ScenarioController<ModelVariant> {
+class Scenario {
   protected:
     settings::SettingsNode scenario_node;
     const settings::SettingsNode& settings;
@@ -41,7 +41,9 @@ class Scenario : public ScenarioController<ModelVariant> {
     Scenario(const settings::SettingsNode& settings_p, settings::SettingsNode scenario_node_p, Model<ModelVariant>* const model_p);
     virtual ~Scenario() {}
     virtual Time start() { return Time(0.0); }  // TODO eliminate return type
+    virtual Time start_time() { return model()->start_time();};
     virtual void end() {}
+    virtual bool iterate() {};
     virtual bool is_first_timestep() const { return model()->timestep() == 0; }
     virtual bool is_last_timestep() const { return model()->time() >= model()->stop_time(); }
     virtual std::string calendar_str() const { return "standard"; }

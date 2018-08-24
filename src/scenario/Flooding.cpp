@@ -59,7 +59,7 @@ void Flooding<ModelVariant>::set_region_forcing(Region<ModelVariant>* region, co
     for (auto& it : region->economic_agents) {
         if (it->is_firm()) {
             if (sectors.empty() || std::find(sectors.begin(), sectors.end(), it->as_firm()->sector->index()) != sectors.end()) {
-                it->forcing(1.0 - forcing / proxy_sum);
+                model()->run()->scenario_controller()->set_firm_forcing(it->as_firm(),1.0 - forcing / proxy_sum);
             }
         }
     }

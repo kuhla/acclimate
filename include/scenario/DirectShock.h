@@ -35,7 +35,8 @@ class DirectShock : public Scenario<ModelVariant> {
   protected:
     using Scenario<ModelVariant>::scenario_node;
     using Scenario<ModelVariant>::settings;
-    using Scenario<ModelVariant>:: model_m;
+    using Scenario<ModelVariant>::model_m;
+    using Scenario<ModelVariant>::model;
     void apply_target(const settings::SettingsNode& node, const bool reset);
 
   public:

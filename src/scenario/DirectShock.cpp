@@ -35,7 +35,7 @@ DirectShock<ModelVariant>::DirectShock(const settings::SettingsNode& settings_p,
 
 
 template<class ModelVariant>
-void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, const bool reset) {
+void DirectShock<ModelVariant>::apply_target(const settings::SettingsNode& node, const bool reset) {
     for (const auto& targets : node.as_sequence()) {
         for (const auto& target : targets.as_map()) {
             const std::string& type = target.first;
@@ -45,7 +45,11 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
                     if (it.has("region")) {
                         Firm<ModelVariant>* firm = model()->find_firm(it["sector"].template as<std::string>(), it["region"].template as<std::string>());
                         if (firm) {
-                            set_firm_property(firm, it, reset);
+                            if (it.has("remaining_capacity")) {
+                                model()->run()->scenario_controller()->set_firm_forcing(firm, reset ? 1.0 : it["remaining_capacity"].as<Forcing>() / firm->capacity_manager->possible_overcapacity_ratio_beta);
+                            } else if (it.has("forcing")) {
+                                model()->run()->scenario_controller()->set_firm_forcing(firm, reset ? 1.0 : it["forcing"].as<Forcing>());
+                            }
                         } else {
                             error("Firm " << it["sector"].template as<std::string>() << ":" << it["region"].template as<std::string>() << " not found");
                         }
@@ -53,7 +57,11 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
                         Sector<ModelVariant>* sector = model()->find_sector(it["sector"].template as<std::string>());
                         if (sector) {
                             for (auto& p : sector->firms) {
-                                set_firm_property(p, it, reset);
+                                if (it.has("remaining_capacity")) {
+                                    model()->run()->scenario_controller()->set_firm_forcing(p, reset ? 1.0 : it["remaining_capacity"].as<Forcing>() / firm->capacity_manager->possible_overcapacity_ratio_beta);
+                                } else if (it.has("forcing")) {
+                                    model()->run()->scenario_controller()->set_firm_forcing(p, reset ? 1.0 : it["forcing"].as<Forcing>());
+                                }
                             }
                         } else {
                             error("Sector " << it["sector"].template as<std::string>() << " not found");
@@ -65,7 +73,11 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
                         if (region) {
                             for (auto& ea : region->economic_agents) {
                                 if (ea->type == EconomicAgent<ModelVariant>::Type::FIRM) {
-                                    set_firm_property(ea->as_firm(), it, reset);
+                                    if (it.has("remaining_capacity")) {
+                                        model()->run()->scenario_controller()->set_firm_forcing(ea->as_firm(), reset ? 1.0 : it["remaining_capacity"].as<Forcing>() / firm->capacity_manager->possible_overcapacity_ratio_beta);
+                                    } else if (it.has("forcing")) {
+                                        model()->run()->scenario_controller()->set_firm_forcing(ea->as_firm(), reset ? 1.0 : it["forcing"].as<Forcing>());
+                                    }
                                 }
                             }
                         } else {
@@ -74,7 +86,11 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
                     } else {
                         for (auto& s : model()->sectors) {
                             for (auto& p : s->firms) {
-                                set_firm_property(p, it, reset);
+                                if (it.has("remaining_capacity")) {
+                                    model()->run()->scenario_controller()->set_firm_forcing(p, reset ? 1.0 : it["remaining_capacity"].as<Forcing>() / firm->capacity_manager->possible_overcapacity_ratio_beta);
+                                } else if (it.has("forcing")) {
+                                    model()->run()->scenario_controller()->set_firm_forcing(p, reset ? 1.0 : it["forcing"].as<Forcing>());
+                                }
                             }
                         }
                     }
@@ -83,7 +99,7 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
                 if (it.has("region")) {
                     Consumer<ModelVariant>* consumer = model()->find_consumer(it["region"].template as<std::string>());
                     if (consumer) {
-                        set_consumer_property(consumer, it, reset);
+                        model()->run()->scenario_controller->set_consumer_forcing(consumer, reset ? 1.0 : it["forcing"].as<Forcing>());
                     } else {
                         error("Consumer " << it["region"].template as<std::string>() << " not found");
                     }
@@ -91,7 +107,7 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
                     for (auto& r : model()->regions) {
                         for (auto& ea : r->economic_agents) {
                             if (ea->type == EconomicAgent<ModelVariant>::Type::CONSUMER) {
-                                set_consumer_property(ea->as_consumer(), it, reset);
+                                model()->run()->scenario_controller->set_consumer_forcing(ea->as_consumer(), reset ? 1.0 : it["forcing"].as<Forcing>());
                             }
                         }
                     }
@@ -100,7 +116,9 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
                 if (it.has("sea_route")) {
                     GeoLocation<ModelVariant>* location = model()->find_location(it["sea_route"].template as<std::string>());
                     if (location) {
-                        set_location_property(location, it, reset);
+                        if (it.has("passage")) {
+                            model()->run()->scenario_controller()->set_location_forcing(location, reset ? 1.0 : it["sea_route"].as<Forcing>());
+                        }
                     } else {
                         error("Sea route " << it["sea_route"].template as<std::string>() << " not found");
                     }
@@ -110,8 +128,27 @@ void Scenario<ModelVariant>::apply_target(const settings::SettingsNode& node, co
     }
 }
 
+
+
 template<class ModelVariant>
-bool Scenario<ModelVariant>::iterate() {
+Time DirectShock<ModelVariant>::start_time() {
+    Time start_time;
+    bool boolean_first_shock = true;
+    for ( const auto& event : scenario_node["events"].as_sequence()) {
+        const std::string& type = event["type"].template as<std::string>();
+        if (type == "shock") {
+            const Time from = event["from"].template as<Time>();
+            if (boolean_first_shock || from < start_time ) {
+                start_time = from;
+                boolean_first_shock = false;
+            }
+        }
+    }
+    return start_time;
+}
+
+template<class ModelVariant>
+bool DirectShock<ModelVariant>::iterate() {
     for (const auto& event : scenario_node["events"].as_sequence()) {
         const std::string& type = event["type"].template as<std::string>();
         if (type == "shock") {

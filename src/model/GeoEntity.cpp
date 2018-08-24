@@ -35,6 +35,11 @@ void GeoEntity<ModelVariant>::set_forcing_nu(Forcing forcing_nu_p) {
         transport_chain_links[i]->set_forcing_nu(forcing_nu_p);
     }
 }
+template<class ModelVariant>
+Forcing GeoEntity<ModelVariant>::forcing() {
+    return transport_chain_links[0]->forcing();
+}
+
 
 template<class ModelVariant>
 GeoEntity<ModelVariant>::~GeoEntity() {

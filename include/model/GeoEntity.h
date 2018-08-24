@@ -44,7 +44,7 @@ class GeoEntity {
   public:
     const TransportDelay delay;
     std::vector<TransportChainLink<ModelVariant>*> transport_chain_links;
-
+    Forcing forcing();
     GeoEntity(Model<ModelVariant>* const model_p, TransportDelay delay_p, Type type_p);
     virtual ~GeoEntity();
     Type type() const { return type_m; }

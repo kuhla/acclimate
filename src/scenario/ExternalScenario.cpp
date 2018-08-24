@@ -78,6 +78,11 @@ static unsigned int get_ref_year(const std::string& time_str) {
 }
 
 template<class ModelVariant>
+Time ExternalScenario<ModelVariant>::start_time() {
+    return static_cast<Time>(forcing->start_time());
+}
+
+template<class ModelVariant>
 bool ExternalScenario<ModelVariant>::next_forcing_file() {
     if (file_index > file_index_to) {
         forcing.reset();

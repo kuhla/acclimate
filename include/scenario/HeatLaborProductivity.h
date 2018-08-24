@@ -24,6 +24,7 @@
 #include <vector>
 #include "scenario/RasteredScenario.h"
 #include "types.h"
+#include "run.h"
 
 namespace acclimate {
 
@@ -48,6 +49,7 @@ class HeatLaborProductivity : public RasteredScenario<ModelVariant, HeatLaborPro
                           RegionForcingType& region_forcing) const override;
 
   public:
+    using RasteredScenario<ModelVariant, HeatLaborProductivityRegionForcingType>::model;
     HeatLaborProductivity(const settings::SettingsNode& settings_p, settings::SettingsNode scenario_node_p, Model<ModelVariant>* const model_p);
 };
 }  // namespace acclimate

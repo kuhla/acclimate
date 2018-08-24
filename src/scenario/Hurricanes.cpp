@@ -47,7 +47,7 @@ template<class ModelVariant>
 void Hurricanes<ModelVariant>::set_region_forcing(Region<ModelVariant>* region, const FloatType& forcing, FloatType proxy_sum) const {
     for (auto& it : region->economic_agents) {
         if (it->type == EconomicAgent<ModelVariant>::Type::FIRM) {
-            it->forcing(1.0 - forcing / proxy_sum);
+            model()->run()->scenario_controller()->set_firm_forcing(it->as_firm(),1.0 - forcing / proxy_sum);
         }
     }
 }

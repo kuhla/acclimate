@@ -43,6 +43,7 @@ class GeoLocation : public GeoEntity<ModelVariant> {
 
   public:
     using GeoEntity<ModelVariant>::model;
+    using GeoEntity<ModelVariant>::forcing;
     std::vector<std::shared_ptr<GeoConnection<ModelVariant>>> connections;
     const Type type;
 

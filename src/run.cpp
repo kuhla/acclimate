@@ -40,12 +40,14 @@
 #include "output/NetCDFOutput.h"
 #include "output/ProgressOutput.h"
 #include "scenario/DirectPopulation.h"
+#include "scenario/DirectShock.h"
 #include "scenario/EventSeriesScenario.h"
 #include "scenario/Flooding.h"
 #include "scenario/HeatLaborProductivity.h"
 #include "scenario/Hurricanes.h"
 #include "scenario/Scenario.h"
 #include "scenario/Taxes.h"
+#include "scenario/ScenarioController.h"
 #include "variants/ModelVariants.h"
 
 namespace acclimate {
@@ -63,27 +65,29 @@ Run<ModelVariant>::Run(settings::SettingsNode settings_p) : settings_m(std::move
         model_m.reset(model);
     }
 
-    Scenario<ModelVariant>* sub_scenario;  // TODO put in scope below!
+    auto scenario_controller = new ScenarioController<ModelVariant>(this);
+    scenario_controller_m.reset(scenario_controller);
+    Scenario<ModelVariant>* scenario;  // TODO put in scope below!
     for (auto scenario_node : settings_m["scenarios"].as_sequence()) {
         const std::string& type = scenario_node["type"].as<std::string>();
         if (type == "events") {
-            sub_scenario = new DirectShock<ModelVariant>(settings_m, scenario_node, model);
+            scenario = new DirectShock<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "taxes") {
-            sub_scenario = new Taxes<ModelVariant>(settings_m, scenario_node, model);
+            scenario = new Taxes<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "flooding") {
-            sub_scenario = new Flooding<ModelVariant>(settings_m, scenario_node, model);
+            scenario = new Flooding<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "hurricanes") {
-            sub_scenario = new Hurricanes<ModelVariant>(settings_m, scenario_node, model);
+            scenario = new Hurricanes<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "direct_population") {
-            sub_scenario = new DirectPopulation<ModelVariant>(settings_m, scenario_node, model);
+            scenario = new DirectPopulation<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "heat_labor_productivity") {
-            sub_scenario = new HeatLaborProductivity<ModelVariant>(settings_m, scenario_node, model);
+            scenario = new HeatLaborProductivity<ModelVariant>(settings_m, scenario_node, model);
         } else if (type == "event_series") {
-            sub_scenario = new EventSeriesScenario<ModelVariant>(settings_m, scenario_node, model);
+            scenario = new EventSeriesScenario<ModelVariant>(settings_m, scenario_node, model);
         } else {
             error_("Unknown scenario type '" << type << "'");
         }
-        scenario_m->sub_scenarios.emplace_back(sub_scenario);
+        scenario_controller_m->scenarios.emplace_back(scenario);
     }
 
     for (const auto& node : settings_m["outputs"].as_sequence()) {
@@ -125,7 +129,7 @@ int Run<ModelVariant>::run() {
 
     step(IterationStep::INITIALIZATION);
 
-    scenario_m->start();
+    scenario_controller_m->start();
     
     model_m->start();
     for (const auto& output : outputs_m) {
@@ -149,7 +153,7 @@ int Run<ModelVariant>::run() {
     auto t0 = std::chrono::high_resolution_clock::now();
 
     while (!model_m->done()) {
-        scenario_m->iterate();
+        scenario_controller_m->iterate();
 #ifdef ENABLE_DMTCP
         if (settings_m.has("checkpoint")) {
             if (settings_m["checkpoint"].template as<int>()

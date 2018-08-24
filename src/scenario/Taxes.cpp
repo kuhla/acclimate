@@ -67,6 +67,22 @@ bool Taxes<VariantDemand>::iterate() {
 }
 #endif
 
+
+
+template<class ModelVariant>
+Time Taxes<ModelVariant>::start_time() {
+    Time start_time;
+    bool boolean_first_tax = true;
+    for (const settings::SettingsNode& tax : scenario_node["taxes"].as_sequence()) {
+        const Time start_tax = tax["start_tax"].as<Time>();
+        if (boolean_first_tax || start_tax < start_time ) {
+            start_time = start_tax;
+            boolean_first_tax = false;
+        }
+    }
+    return start_time;
+}
+
 template<class ModelVariant>
 bool Taxes<ModelVariant>::iterate() {
     if (model()->time() > model()->stop_time()) {

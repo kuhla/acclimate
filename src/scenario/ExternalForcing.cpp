@@ -48,6 +48,12 @@ int ExternalForcing::next_timestep() {
     return day;
 }
 
+int ExternalForcing::start_time() {
+   unsigned int start_time;
+   time_variable.getVar({0},{1},&start_time);
+   return start_time; 
+}
+
 const std::string ExternalForcing::calendar_str() const {
     try {
         std::string res;

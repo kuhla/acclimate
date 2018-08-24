@@ -32,6 +32,8 @@
 #include <vector>
 #include "settingsnode.h"
 #include "types.h"
+#include "scenario/ScenarioController.h"
+
 
 namespace acclimate {
 
@@ -80,15 +82,17 @@ template<class ModelVariant>
 class Sector;
 template<class ModelVariant>
 class EconomicAgent;
+template<class ModelVariant>
+class ScenarioController;
 
 template<class ModelVariant>
 class Run {
     friend class Acclimate;
 
   protected:
+    std::unique_ptr<ScenarioController<ModelVariant>> scenario_controller_m;
     static std::unique_ptr<Run> instance_m;
     std::unique_ptr<Model<ModelVariant>> model_m;
-    ScenarioController<ModelVariant> scenario_m;
     std::vector<std::unique_ptr<Output<ModelVariant>>> outputs_m;
     unsigned int time_m = 0;
     std::size_t duration_m = 0;
@@ -102,6 +106,7 @@ class Run {
     inline void step(const IterationStep& step_p) { step_m = step_p; }
 
   public:
+    inline ScenarioController<ModelVariant>* scenario_controller() {return scenario_controller_m.get();}
     static const std::array<const char*, static_cast<int>(EventType::OPTIMIZER_FAILURE) + 1> event_names;
 
     Run(settings::SettingsNode settings_p);
